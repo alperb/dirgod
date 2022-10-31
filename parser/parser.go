@@ -51,6 +51,7 @@ func (dp *DirParser) readFile() {
 
 			if strings.HasPrefix(line, tabPrefix + "> ") { // means it's a directory so we continue the execution by pushing
 				stack.Push(line[lastTabCount + 2:])
+				stack.createPath()
 			} else if strings.HasPrefix(line, tabPrefix + "- ") {
 				filename := line[lastTabCount + 2:]
 				stack.createFile(filename)
