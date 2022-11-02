@@ -1,12 +1,10 @@
 package parser
 
 import (
+	"bufio"
 	"fmt"
 	"os"
-	"bufio"
 	"strings"
-
-	//	"strings"
 )
 
 func NewDirParser(filename string) *DirParser {
@@ -44,21 +42,22 @@ func (dp *DirParser) readFile() {
 			continue
 		}
 
-		currentTabCount :=  strings.Count(line, "\t")
+		currentTabCount := strings.Count(line, "\t")
 		if currentTabCount >= lastTabCount { // at the same directory stack
 			lastTabCount = currentTabCount
-			tabPrefix := strings.Join(make([]string, lastTabCount + 1), "\t")
+			tabPrefix := strings.Join(make([]string, lastTabCount+1), "\t")
 
-			if strings.HasPrefix(line, tabPrefix + "> ") { // means it's a directory so we continue the execution by pushing
-				stack.Push(line[lastTabCount + 2:])
+			if strings.HasPrefix(line, tabPrefix+"> ") { // means it's a directory so we continue the execution by pushing
+				stack.Push(line[lastTabCount+2:])
 				stack.createPath()
-			} else if strings.HasPrefix(line, tabPrefix + "- ") {
-				filename := line[lastTabCount + 2:]
+			} else if strings.HasPrefix(line, tabPrefix+"- ") {
+				filename := line[lastTabCount+2:]
 				stack.createFile(filename)
 			}
 
 		} else {
 			stack.Pop()
+			lastTabCount -= 1
 		}
 	}
 

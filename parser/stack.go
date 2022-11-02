@@ -8,12 +8,12 @@ import (
 )
 
 type DirStack struct {
-	rootDir string
-	Stack      []string
+	rootDir       string
+	Stack         []string
 	isPathCreated bool
 }
 
-func (ds *DirStack) createPath() (bool, error){
+func (ds *DirStack) createPath() (bool, error) {
 	if ds.isPathCreated {
 		return true, nil
 	}
@@ -27,6 +27,17 @@ func (ds *DirStack) createPath() (bool, error){
 	return true, nil
 }
 
+func (ds *DirStack) decideOperation(filename string) int {
+	if strings.Count(filename, "<>") == 1 {
+		return 3
+	} else if strings.Count(filename, "<<") == 1 {
+		return 2
+	} else if strings.Count(filename, "<") == 1 {
+		return 1
+	}
+	return 0
+}
+
 func (ds *DirStack) createFile(filename string) {
 	_, perr := ds.createPath()
 	if perr != nil {
@@ -35,13 +46,25 @@ func (ds *DirStack) createFile(filename string) {
 	}
 	parsedFileName := filename
 
-	// does the file have a copy operator?
-	opCount := strings.Count(filename, "<")
-	if opCount == 1 { // file content is going to be copied
+	operation := ds.decideOperation(filename)
+	switch operation {
+	case 1: // file content is going to be copied
 		opIndex := strings.Index(filename, "<")
-		parsedFileName = parsedFileName[:opIndex - 1]
-		copyingFilePath := filename[opIndex + 2:]
-		defer ds.copyFileContent(parsedFileName, copyingFilePath)
+		parsedFileName = parsedFileName[:opIndex-1]
+		copyingFilePath := filename[opIndex+2:]
+		defer ds.copyFileContent(copyingFilePath, parsedFileName)
+	case 2: // file is going to be moved
+		opIndex := strings.Index(filename, "<<")
+		parsedFileName = parsedFileName[:opIndex-1]
+		movingFilePath := filename[opIndex+3:]
+		defer ds.moveFile(movingFilePath, parsedFileName)
+		return
+	case 3: // file is going to be linked
+		opIndex := strings.Index(filename, "<>")
+		parsedFileName = parsedFileName[:opIndex-1]
+		linkedFilePath := filename[opIndex+3:]
+		defer ds.linkFile(linkedFilePath, parsedFileName)
+		return
 	}
 
 	ds.Push(parsedFileName)
@@ -70,12 +93,28 @@ func (ds *DirStack) Push(dir string) {
 func (ds *DirStack) Pop() {
 	if len(ds.Stack) > 1 {
 		length := len(ds.Stack)
-		ds.Stack = ds.Stack[:length - 1]
+		ds.Stack = ds.Stack[:length-1]
 		ds.isPathCreated = false
 	}
 }
 
-func (ds* DirStack) copyFileContent(to string, from string) {
+func (ds *DirStack) moveFile(from string, to string) {
+	err := os.Rename(from, filepath.Join(strings.Join(ds.Stack, "/"), "/", to))
+	if err != nil {
+		fmt.Println(err)
+		panic(fmt.Sprintf("Failed to move file: %s", from))
+	}
+}
+
+func (ds *DirStack) linkFile(from string, to string) {
+	err := os.Symlink(from, filepath.Join(strings.Join(ds.Stack, "/"), "/", to))
+	if err != nil {
+		fmt.Println(err)
+		panic(fmt.Sprintf("Failed to link file: %s", from))
+	}
+}
+
+func (ds *DirStack) copyFileContent(from string, to string) {
 	// lets make here open the file once to reduce fd use
 	f, cerr := os.OpenFile(filepath.Join(strings.Join(ds.Stack, "/"), "/", to), os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if cerr != nil {

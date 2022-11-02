@@ -2,10 +2,10 @@
 > test_folder
 	- test_file.txt
 	- second_test.txt
+	- moved_file << /Users/alper/Desktop/dump.txt
+	- linked_file <> /Users/alper/Desktop/fleets.token
 	> sub_folder
 		- included_file.token < /Users/alper/Desktop/fleets.token
-//	- linked_file <> /etc/nginx/sites-available/alperb.com
-//	- moved_file << /Users/alper/Desktop/dump.txt
 //> operated_folder < /Users/alper/Desktop/Personal
 //> moved_folder << /Users/alper/Desktop/Staj
-//> linked_folder << /Users/alper/Desktop/linkable_folder
+//> linked_folder <> /Users/alper/Desktop/linkable_folder
