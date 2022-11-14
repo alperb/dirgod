@@ -8,11 +8,13 @@ import (
 )
 
 func NewDirParser(filename string) *DirParser {
-	return &DirParser{filename}
+	return &DirParser{filename, -1, DirStack{}}
 }
 
 type DirParser struct {
-	filename string
+	filename     string
+	lastTabCount int
+	stack        DirStack
 }
 
 func (dp *DirParser) readFile() {
@@ -25,13 +27,13 @@ func (dp *DirParser) readFile() {
 	file := bufio.NewScanner(readFile)
 	file.Split(bufio.ScanLines)
 
-	stack := DirStack{"", make([]string, 0), false}
+	dp.stack = DirStack{"", make([]string, 0), false}
 
-	lastTabCount := -1
+	dp.lastTabCount = -1
 
 	if file.Scan() {
 		rootDir := file.Text()
-		stack.SetRootDir(rootDir)
+		dp.stack.SetRootDir(rootDir)
 	}
 
 	for file.Scan() {
@@ -43,21 +45,12 @@ func (dp *DirParser) readFile() {
 		}
 
 		currentTabCount := strings.Count(line, "\t")
-		if currentTabCount >= lastTabCount { // at the same directory stack
-			lastTabCount = currentTabCount
-			tabPrefix := strings.Join(make([]string, lastTabCount+1), "\t")
-
-			if strings.HasPrefix(line, tabPrefix+"> ") { // means it's a directory so we continue the execution by pushing
-				stack.Push(line[lastTabCount+2:])
-				stack.createPath()
-			} else if strings.HasPrefix(line, tabPrefix+"- ") {
-				filename := line[lastTabCount+2:]
-				stack.createFile(filename)
-			}
-
+		if currentTabCount >= dp.lastTabCount { // at the same directory stack
+			dp.lastTabCount = currentTabCount
+			dp.performTypeOperation(line)
 		} else {
-			stack.Pop()
-			lastTabCount -= 1
+			dp.stack.Pop()
+			dp.lastTabCount = -1
 		}
 	}
 
@@ -66,6 +59,19 @@ func (dp *DirParser) readFile() {
 		panic("Failed to close file!")
 	}
 }
+
+func (dp *DirParser) performTypeOperation(line string) {
+	tabPrefix := strings.Join(make([]string, dp.lastTabCount+1), "\t")
+
+	if strings.HasPrefix(line, tabPrefix+"> ") { // means it's a directory so we continue the execution by pushing
+		dp.stack.Push(line[dp.lastTabCount+2:])
+		dp.stack.createPath()
+	} else if strings.HasPrefix(line, tabPrefix+"- ") {
+		filename := line[dp.lastTabCount+2:]
+		dp.stack.createFile(filename)
+	}
+}
+
 func (dp *DirParser) Parse() {
 	dp.readFile()
 }
