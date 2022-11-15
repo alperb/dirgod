@@ -10,7 +10,7 @@ import (
 func main() {
 	args := os.Args[1:]
 	arguments := Arguments.NewArguments(args)
-	parser := Parser.NewDirParser(arguments.Filename)
+	parser := Parser.NewDirParser(*arguments)
 	parser.Parse()
 	fmt.Println("Created!")
 }
