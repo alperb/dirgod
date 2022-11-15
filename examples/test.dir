@@ -2,7 +2,7 @@
 > test_folder
 	- test_file.txt
 	- second_test.txt
-	- moved_file << /Users/alper/Desktop/dump.txt
+//	- moved_file << /Users/alper/Desktop/dump.txt
 	> sub_folder
 		- included_file.token < /Users/alper/Desktop/fleets.token
 	- linked_file <> /Users/alper/Desktop/fleets.token
