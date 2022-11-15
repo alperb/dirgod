@@ -1,7 +1,5 @@
 package arguments
 
-var DEBUG_MODE bool = false
-
 var AVAILABLE_ARGS = []string{
 	"-d",
 	"--debug",
@@ -10,7 +8,7 @@ var AVAILABLE_ARGS = []string{
 type Arguments struct {
 	RawArgs    []string
 	DEBUG_MODE bool
-	Filename string
+	Filename   string
 }
 
 func NewArguments(args []string) *Arguments {

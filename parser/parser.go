@@ -1,24 +1,25 @@
 package parser
 
 import (
+	. "alperb/dirgod/arguments"
 	"bufio"
 	"fmt"
 	"os"
 	"strings"
 )
 
-func NewDirParser(filename string) *DirParser {
-	return &DirParser{filename, -1, DirStack{}}
+func NewDirParser(args Arguments) *DirParser {
+	return &DirParser{args, -1, DirStack{}}
 }
 
 type DirParser struct {
-	filename     string
+	args         Arguments
 	lastTabCount int
 	stack        DirStack
 }
 
 func (dp *DirParser) readFile() {
-	readFile, err := os.Open("test.dir")
+	readFile, err := os.Open(dp.args.Filename)
 
 	if err != nil {
 		fmt.Println(err)
