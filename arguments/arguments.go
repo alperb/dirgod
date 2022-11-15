@@ -3,16 +3,19 @@ package arguments
 var AVAILABLE_ARGS = []string{
 	"-d",
 	"--debug",
+	"-v",
+	"--verbose",
 }
 
 type Arguments struct {
-	RawArgs    []string
-	DEBUG_MODE bool
-	Filename   string
+	RawArgs      []string
+	DEBUG_MODE   bool
+	VERBOSE_MODE bool
+	Filename     string
 }
 
 func NewArguments(args []string) *Arguments {
-	a := &Arguments{args, false, args[0]}
+	a := &Arguments{args, false, false, args[len(args)-1]}
 	a.Init()
 	return a
 }
@@ -39,6 +42,8 @@ func (a *Arguments) setDebugMode() {
 	for _, arg := range a.RawArgs {
 		if arg == "-d" || arg == "--debug" {
 			a.DEBUG_MODE = true
+		} else if arg == "-v" || arg == "--verbose" {
+			a.VERBOSE_MODE = true
 		}
 	}
 }
