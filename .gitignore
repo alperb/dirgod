@@ -1,3 +1,6 @@
+# OSX file structure file
+.DS_Store
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -5,6 +8,12 @@
 *.so
 *.dylib
 build/
+
+# IDE environment files
+.idea/
+.vscode/
+.fleet/
+.fleets/
 
 # Test binary, built with `go test -c`
 *.test
@@ -14,3 +23,6 @@ build/
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Dirgod binary
+dirgod
